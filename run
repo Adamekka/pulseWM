@@ -1,0 +1,25 @@
+#!/bin/sh
+
+RELEASE=false
+
+if [ "$1" = "release" ]; then
+    RELEASE=true
+fi
+
+if [ $RELEASE = true ]; then
+    cargo build --release
+else
+    cargo build
+fi
+
+unset XDG_SEAT
+
+Xephyr -ac -br -noreset -screen 1280x720 :1 &
+sleep 1s
+export DISPLAY=:1
+
+if [ $RELEASE = true ]; then
+    ./target/release/pulseWM
+else
+    ./target/debug/pulseWM
+fi
