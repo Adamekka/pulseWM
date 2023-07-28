@@ -147,33 +147,31 @@ fn main() {
 
             winit
                 .dispatch_new_events(|event: winit::WinitEvent| {
-                    if let WinitEvent::Input(event) = event {
-                        if let InputEvent::Keyboard { event } = event {
-                            let serial: Serial = SERIAL_COUNTER.next_serial();
-                            let time: u32 = backend::input::Event::time_msec(&event);
-                            let press_state = event.state();
-                            let action = seat.get_keyboard().unwrap().input::<u8, _>(
-                                state,
-                                event.key_code(),
-                                press_state,
-                                serial,
-                                time,
-                                |_, _, keysym: KeysymHandle<'_>| {
-                                    if press_state == KeyState::Pressed
-                                        && keysym.modified_sym() == keysyms::KEY_t | keysyms::KEY_T
-                                    {
-                                        FilterResult::Intercept(1)
-                                    } else {
-                                        FilterResult::Forward
-                                    }
-                                },
-                            );
+                    if let WinitEvent::Input(InputEvent::Keyboard { event }) = event {
+                        let serial: Serial = SERIAL_COUNTER.next_serial();
+                        let time: u32 = backend::input::Event::time_msec(&event);
+                        let press_state = event.state();
+                        let action = seat.get_keyboard().unwrap().input::<u8, _>(
+                            state,
+                            event.key_code(),
+                            press_state,
+                            serial,
+                            time,
+                            |_, _, keysym: KeysymHandle<'_>| {
+                                if press_state == KeyState::Pressed
+                                    && keysym.modified_sym() == keysyms::KEY_t | keysyms::KEY_T
+                                {
+                                    FilterResult::Intercept(1)
+                                } else {
+                                    FilterResult::Forward
+                                }
+                            },
+                        );
 
-                            if Some(1) == action {
-                                std::process::Command::new("alacritty")
-                                    .spawn()
-                                    .expect("Failed to spawn alacritty");
-                            }
+                        if Some(1) == action {
+                            std::process::Command::new("alacritty")
+                                .spawn()
+                                .expect("Failed to spawn alacritty");
                         }
                     }
                 })
